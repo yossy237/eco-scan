@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Scan | Clasificador de Residuos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Eco-Scan</h1>
+        
+        <div class="controls">
+            <button onclick="initCamera()" class="btn-main">Usar Cámara</button>
+            <label for="image-upload" class="btn-secondary">Subir Imagen</label>
+            <input type="file" id="image-upload" accept="image/*" style="display:none">
+        </div>
+
+        <div id="webcam-container">
+            <img id="image-preview" style="display:none; width:100%; border-radius:15px; border: 4px solid #2d5a27;">
+        </div>
+
+        <div id="label-container">Esperando acción...</div>
+
+        <div id="instructions" class="card">
+            <h3>Instrucción de Reciclaje</h3>
+            <p id="recycling-tip">Presiona un botón para comenzar.</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

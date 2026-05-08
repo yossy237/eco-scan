@@ -1,0 +1,43 @@
+/* Mejora visual para móviles */
+.container {
+    max-width: 500px; /* Un poco más ancho */
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.btn-main, .btn-secondary {
+    width: 100%; /* Botones grandes fáciles de tocar */
+    height: 55px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+video, img {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    border-radius: 15px;
+}
+
+#label-container {
+    background: #e8f5e9; /* Fondo verde clarito para el resultado */
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 5px solid #2d5a27;
+    margin: 20px 0;
+}
+
+/* Animación de carga */
+#webcam-container canvas {
+    border: 6px solid #2d5a27;
+    animation: border-pulse 2s infinite;
+}
+
+@keyframes border-pulse {
+    0% { border-color: #2d5a27; }
+    50% { border-color: #a5d6a7; }
+    100% { border-color: #2d5a27; }
+}

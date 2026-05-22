@@ -14,12 +14,16 @@
         
         <div class="controls">
             <button onclick="initCamera()" class="btn-main">Usar Cámara</button>
-            <label for="image-upload" class="btn-secondary">Subir Imagen</label>
+            <button onclick="document.getElementById('image-upload').click()" class="btn-secondary">Subir Imagen</button>
             <input type="file" id="image-upload" accept="image/*" style="display:none">
         </div>
 
         <div id="webcam-container">
             <img id="image-preview" style="display:none; width:100%; border-radius:15px; border: 4px solid #2d5a27;">
+        </div>
+
+        <div class="capture-container">
+            <button onclick="toggleScan()" id="btn-capture" class="btn-capture" style="display:none;">Escanear residuo</button>
         </div>
 
         <div id="label-container">Esperando acción...</div>

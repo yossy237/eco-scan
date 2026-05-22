@@ -1,96 +1,123 @@
-const URL = "./my_model/";
+const URL_MODELO = "./my_model/";
+
 let model, webcam, labelContainer, maxPredictions;
+let isScanning = true;
 
-// 1. Cargar el modelo al abrir la app
-async function loadModel() {
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
-    console.log("Modelo cargado.");
-}
-loadModel();
+const consejosReciclaje = {
+    "PET": "Deposite en el contenedor AZUL. Asegúrese de que la botella esté vacía, aplastada y con su tapa puesta.",
+    "Aluminio": "Deposite en el contenedor GRIS/VERDE. Enjuague ligeramente la lata y compáctela si es posible.",
+    "Vidrio": "Deposite en el contenedor VERDE claros/oscuros. Maneje con cuidado. No introduzca cerámicas ni cristales rotos.",
+    "Carton_Papel": "Deposite en el contenedor AMARILLO/GRIS. El cartón debe estar seco, limpio y completamente plegado."
+};
 
-// 2. Opción A: Iniciar Cámara (Fuerza cámara trasera en móviles)
 async function initCamera() {
     document.getElementById("image-preview").style.display = "none";
-    const flip = false; // No necesitamos espejo para la cámara trasera
-    webcam = new tmImage.Webcam(300, 300, flip);
+    labelContainer = document.getElementById("label-container");
+    labelContainer.innerHTML = "Cargando modelo de IA...";
+
+    if (!model) {
+        const modelURL = URL_MODELO + "model.json";
+        const metadataURL = URL_MODELO + "metadata.json";
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+    }
+
+    const flip = true;
+    webcam = new tmImage.Webcam(300, 300, flip); 
     
     try {
-        await webcam.setup({ facingMode: "environment" }); // "environment" pide la cámara de atrás
+        await webcam.setup({ facingMode: "environment" }); 
         await webcam.play();
-        document.getElementById("webcam-container").innerHTML = "";
+        
+        isScanning = true;
+        document.getElementById("webcam-container").innerHTML = ""; 
         document.getElementById("webcam-container").appendChild(webcam.canvas);
+        
+        const btnCapture = document.getElementById("btn-capture");
+        btnCapture.style.display = "block";
+        btnCapture.innerHTML = "Escanear residuo";
+        btnCapture.style.backgroundColor = "#e67e22"; 
+
+        labelContainer.innerHTML = "Apunte a un residuo...";
         window.requestAnimationFrame(loop);
-    } catch (e) {
-        alert("Error al abrir cámara. Prueba subiendo una foto.");
-        console.error(e);
+    } catch (error) {
+        labelContainer.innerHTML = "Error al acceder a la cámara.";
+        console.error(error);
     }
 }
 
 async function loop() {
-    webcam.update();
+    if (!isScanning) return;
+    webcam.update(); 
     await predict(webcam.canvas);
     window.requestAnimationFrame(loop);
 }
 
-// 3. Opción B: Subir Archivo
-document.getElementById('image-upload').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+function toggleScan() {
+    const btnCapture = document.getElementById("btn-capture");
+    if (isScanning) {
+        isScanning = false;
+        btnCapture.innerHTML = "Escanear Otro";
+        btnCapture.style.backgroundColor = "#2c3e50"; 
+    } else {
+        isScanning = true;
+        btnCapture.innerHTML = "Escanear residuo";
+        btnCapture.style.backgroundColor = "#e67e22"; 
+        window.requestAnimationFrame(loop);
+    }
+}
 
-    const img = document.getElementById('image-preview');
-    const reader = new FileReader();
-
-    reader.onload = function(event) {
-        img.src = event.target.result;
-        img.style.display = "block";
-        
-        // Si la webcam estaba activa, la detenemos y limpiamos
-        if (webcam) { 
-            try { webcam.stop(); } catch(err) {} 
-            document.getElementById("webcam-container").innerHTML = ""; 
-        }
-        
-        // Colocamos la imagen en el contenedor si no estaba ahí
-        document.getElementById("webcam-container").appendChild(img);
-
-        // Ejecutamos la predicción cuando la imagen termine de renderizarse
-        img.onload = async () => {
-            await predict(img);
-        };
-    };
-    reader.readAsDataURL(file);
-});
-
-// 4. Predicción Genérica
-async function predict(imageElement) {
-    const prediction = await model.predict(imageElement);
-    let highestProb = 0;
-    let bestClass = "";
+async function predict(elementoImagen) {
+    const prediction = await model.predict(elementoImagen);
+    let mejorClase = "";
+    let maximaProbabilidad = 0;
 
     for (let i = 0; i < maxPredictions; i++) {
-        if (prediction[i].probability > highestProb) {
-            highestProb = prediction[i].probability;
-            bestClass = prediction[i].className;
+        if (prediction[i].probability > maximaProbabilidad) {
+            maximaProbabilidad = prediction[i].probability;
+            mejorClase = prediction[i].className;
         }
     }
 
-    const labelContainer = document.getElementById("label-container");
-    if (highestProb > 0.50) { // Bajamos a 50% para pruebas iniciales
-        labelContainer.innerHTML = `Detectado: ${bestClass} (${(highestProb * 90).toFixed(0)}%)`;
-        actualizarInstrucciones(bestClass);
+    const porcentajeVisual = (maximaProbabilidad * 90).toFixed(2);
+    labelContainer.innerHTML = `Detectado: <strong>${mejorClase}</strong> (${porcentajeVisual}%)`;
+
+    const contenedorConsejo = document.getElementById("recycling-tip");
+    if (consejosReciclaje[mejorClase]) {
+        contenedorConsejo.innerHTML = consejosReciclaje[mejorClase];
+    } else {
+        contenedorConsejo.innerHTML = "Residuos no identificados claramente.";
     }
 }
 
-function actualizarInstrucciones(clase) {
-    const tipElement = document.getElementById("recycling-tip");
-    const consejos = {
-        "PET": "aplasta la botella antes de depositarla.",
-        "Aluminio": "Latas vacías y secas. Nota: Las bolsas de botanas brillan, pero NO son aluminio reciclable común.",
-        "Vidrio": "Cuidado con los bordes. Deposita en el contenedor verde.",
-        "Carton_Papel": "Retira cualquier resto de comida."
+document.getElementById("image-upload").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (webcam) {
+        try { webcam.stop(); } catch(e) {}
+    }
+    // Ocultar el botón de escanear video ya que es una foto fija manual
+    document.getElementById("btn-capture").style.display = "none";
+
+    const imgPreview = document.getElementById("image-preview");
+    imgPreview.src = URL.createObjectURL(file);
+    imgPreview.style.display = "block";
+    
+    document.getElementById("webcam-container").innerHTML = "";
+    document.getElementById("webcam-container").appendChild(imgPreview);
+
+    labelContainer = document.getElementById("label-container");
+    labelContainer.innerHTML = "Analizando archivo de imagen...";
+
+    if (!model) {
+        const modelURL = URL_MODELO + "model.json";
+        const metadataURL = URL_MODELO + "metadata.json";
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+    }
+
+    imgPreview.onload = async () => {
+        await predict(imgPreview);
     };
-    tipElement.innerText = consejos[clase] || "Apunta a un objeto...";
-}
+});

@@ -4,10 +4,10 @@ let model, webcam, labelContainer, maxPredictions;
 let isScanning = true;
 
 const consejosReciclaje = {
-    "PET": "Deposite en el contenedor AZUL. Asegúrese de que la botella esté vacía, aplastada y con su tapa puesta.",
-    "Aluminio": "Deposite en el contenedor GRIS/VERDE. Enjuague ligeramente la lata y compáctela si es posible.",
-    "Vidrio": "Deposite en el contenedor VERDE claros/oscuros. Maneje con cuidado. No introduzca cerámicas ni cristales rotos.",
-    "Carton_Papel": "Deposite en el contenedor AMARILLO/GRIS. El cartón debe estar seco, limpio y completamente plegado."
+    "PET": "Deposite aquí botellas de plástico transparentes (agua, refrescos). NOTA: Asegúrese de que estén vacías y aplastadas. No confunda con plásticos rígidos de limpieza.",
+    "Aluminio": "Deposite solo latas de bebidas (refrescos, jugos). NOTA: Las bolsas de papitas/Sabritas NO son aluminio (son plástico metalizado) y no van en este contenedor.",
+    "Vidrio": "Deposite botellas y frascos de vidrio limpios. NOTA: No introduzca focos, espejos, vajillas ni cristales rotos de ventanas.",
+    "Carton_Papel": "Deposite cajas de cartón desarmadas, hojas y periódicos secos. NOTA: Evite cajas con grasa (como las de pizza) o empaques con recubrimiento plástico."
 };
 
 async function initCamera() {

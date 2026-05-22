@@ -79,7 +79,7 @@ async function predict(imageElement) {
 
     const labelContainer = document.getElementById("label-container");
     if (highestProb > 0.50) { // Bajamos a 50% para pruebas iniciales
-        labelContainer.innerHTML = `Detectado: ${bestClass} (${(highestProb * 100).toFixed(0)}%)`;
+        labelContainer.innerHTML = `Detectado: ${bestClass} (${(highestProb * 90).toFixed(0)}%)`;
         actualizarInstrucciones(bestClass);
     }
 }
@@ -87,8 +87,8 @@ async function predict(imageElement) {
 function actualizarInstrucciones(clase) {
     const tipElement = document.getElementById("recycling-tip");
     const consejos = {
-        "PET": "Lava y aplasta la botella antes de depositarla.",
-        "Aluminio": "Asegúrate de que el recipiente este vacío y seco.",
+        "PET": "aplasta la botella antes de depositarla.",
+        "Aluminio": "Latas vacías y secas. Nota: Las bolsas de botanas brillan, pero NO son aluminio reciclable común.",
         "Vidrio": "Cuidado con los bordes. Deposita en el contenedor verde.",
         "Carton_Papel": "Retira cualquier resto de comida."
     };
